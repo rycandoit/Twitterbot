@@ -8,7 +8,9 @@ sudo pip install tweepy
 It also uses phue Python library to control the Philips Hue lighting system
 
 sudo pip install phue
+
 ---
+
 ###Get Bridge and Bulb Info
 
 Step 1
@@ -38,7 +40,9 @@ Step 5
 Set the URL to https://**bridge ip address**/api/**username**/lights
 press the GET button
 You should get a JSON response with all the lights in your system and their names, status and current color. We will need this info for determining bulb id numbers and if you want to change the scripts colors (just run step 5 after you set your colors via phone app)
+
 ---
+
 ###Edit script
 
 sudo nano tweet.py
@@ -72,7 +76,9 @@ Change line 60 to the same bulb id and color you want the bulb to return to afte
 b.set_light(5, whitecommand)
 
 Exit nano CTRL-X, y for save, enter
+
 ---
+
 ###Run Script
 
 Now you're all set to use the python script, you can run it with:
