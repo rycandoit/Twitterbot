@@ -1,22 +1,35 @@
-import RPi.GPIO as GPIO
+# import required modules
 import time
 import tweepy
+from phue import Bridge
 
-# coding=utf-8
+# hue items needed
+b = Bridge('192.168.2.139')
+# If the app is not registered and the button is not pressed, press the button and call connect() (this only needs to be run a single$
+#b.connect()
 
-#here is where you need to add your own keys from the Twitter API
+# credentials to login to twitter api
+consumer_key = 'place key here'
+consumer_secret = 'place key here'
+access_token = 'place key here'
+access_secret = 'place key here'
+
+# login to twitter account api
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(key, secret)
+auth.set_access_token(access_token, access_secret)
+api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+try:
+        api.verify_credentials()
+        print("Success creating API")
+        time.sleep(10)
+except tweepy.TweepError as e:
+        print(e.reason)
 
-api = tweepy.API(auth)
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
-
-#These are the three GPIO pins  my LED's are connected to
-GPIO.setup(17,GPIO.OUT)
-GPIO.setup(27,GPIO.OUT)
-GPIO.setup(22,GPIO.OUT)
+#Set hue color
+redcommand =  {'transitiontime' : 1, 'bri' : 254, 'hue' : 0, 'sat' : 254}
+greencommand =  {'transitiontime' : 1, 'bri' : 254, 'hue' : 25335, 'sat' : 241}
+bluecommand =  {'transitiontime' : 1, 'bri' : 254, 'hue' : 46639, 'sat' : 254}
+whitecommand =  {'transitiontime' : 1, 'bri' : 254, 'hue' : 34069, 'sat' : 251}
 
 #This is where I specify which hashtags I want to track and which color I want them on. Could've named them better, but since I'm working with color, this was more fun.
 blue = "covid19"
@@ -26,24 +39,24 @@ red = "quarantine"
 class MyStreamListener(tweepy.StreamListener):
 
     def on_status(self, status):
-		for i in range(len(status.entities.get('hashtags'))): #for every tweet, it checks all hashtags to see if it matches any of the three we're looking for
-			if (status.entities.get('hashtags')[i].get('text')) == blue:
-				print status.author.screen_name +  " just used the hashtag " + (status.entities.get('hashtags')[i].get('text'))
-				GPIO.output(22,GPIO.HIGH) #LED goes blink
-				time.sleep(0.1) #LED stays blink
-				GPIO.output(22,GPIO.LOW) #LED goes blonk
+        for i in range(len(status.entities.get('hashtags'))): #for every tweet, it checks all hashtags to see if it matches any of the three we're looking for
+            if (status.entities.get('hashtags')[i].get('text')) == blue:
+                print (status.author.screen_name +  " just used the hashtag " + (status.entities.get('hashtags')[i].get('text')))
+                b.set_light(2, bluecommand)
+                time.sleep(2)
+                b.set_light(2, whitecommand)
 
-			elif (status.entities.get('hashtags')[i].get('text')) == green:
-				print status.author.screen_name + " just used the hashtag " + (status.entities.get('hashtags')[i].get('text'))
-				GPIO.output(27,GPIO.HIGH)
-				time.sleep(0.1)
-				GPIO.output(27,GPIO.LOW)
+            elif (status.entities.get('hashtags')[i].get('text')) == green:
+                print (status.author.screen_name + " just used the hashtag " + (status.entities.get('hashtags')[i].get('text')))
+                b.set_light(3, greencommand)
+                time.sleep(2)
+                b.set_light(3, whitecommand)
 
-			elif (status.entities.get('hashtags')[i].get('text')) == red:
-				print status.author.screen_name + " just used the hashtag " + (status.entities.get('hashtags')[i].get('text'))
-				GPIO.output(17,GPIO.HIGH)
-				time.sleep(0.1)
-				GPIO.output(17,GPIO.LOW)
+            elif (status.entities.get('hashtags')[i].get('text')) == red:
+                print (status.author.screen_name + " just used the hashtag " + (status.entities.get('hashtags')[i].get('text')))
+                b.set_light(5, redcommand)
+                time.sleep(2)
+                b.set_light(5, whitecommand)
 
 
 myStreamListener = MyStreamListener()
